@@ -1,0 +1,55 @@
+{
+  "app": {
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "storeFile": "D:/HarmonyOS DevEco Studio/development/Project/ntzc.p12",
+          "storePassword": "000000181BAA1835B65B5AF140CE057C6DA3D83A2DA9EF53683658817B38A3ACAF091C0D3A760699",
+          "keyAlias": "ntzc",
+          "keyPassword": "000000180159E73FF03C699916E34FFCF87F4FA5B27DB7C50ADB69296654363928EF82EF421A9C05",
+          "signAlg": "SHA256withECDSA",
+          "profile": "D:/HarmonyOS DevEco Studio/development/Project/ntzcDebug.p7b",
+          "certpath": "D:/HarmonyOS DevEco Studio/development/Project/农瞳智策.cer"
+        }
+      }
+    ],
+    "products": [
+      {
+        "name": "default",
+        "signingConfig": "default",
+        "compatibleSdkVersion": "5.0.4(16)",
+        "runtimeOS": "HarmonyOS",
+        "buildOption": {
+          "strictMode": {
+            "caseSensitiveCheck": true,
+            "useNormalizedOHMUrl": true
+          }
+        }
+      }
+    ],
+    "buildModeSet": [
+      {
+        "name": "debug",
+      },
+      {
+        "name": "release"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "name": "entry",
+      "srcPath": "./entry",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "label"
+    },
+    {
+      "name": "reason_location",
+      "value": "需要获取精确位置以提供导航、定位等服务"
+    },
+    {
+      "name": "reason_approximately_location",
+      "value": "需要获取大致位置以显示位置"
+    },
+    {
+      "name": "reason_yinliang",
+      "value": "需要调节媒体音量"
+    },
+    {
+      "name": "reason_yinpingliu",
+      "value": "需要访问音频流状态"
+    },
+    {
+      "name": "reason_READ_MEDIA",
+      "value": "需要读取媒体文件以播放视频"
+    },
+    {
+      "name": "reason_WRITE_MEDIA",
+      "value": "需要写入媒体文件以支持视频播放"
+    },
+    {
+      "name": "reson_DISTRIBUTED_DATASYNC",
+      "value": "需要数据同步的权限"
+    },
+    {
+      "name": "reson_BlueTooth",
+      "value": "需要蓝牙连接的权限"
+    }
+  ]
+}

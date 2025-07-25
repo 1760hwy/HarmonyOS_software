@@ -1,0 +1,13 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/Manager",
+    "pages/Control",
+    "pages/Analysis",
+    "pages/Myname",
+    "pages/DataAnalysis",
+    "pages/Video",
+    "Bluetooth/Interaction",
+    "pages/Driver"
+  ]
+}
