@@ -44,7 +44,7 @@ export class SensorService{
         try {
           const responseData: ResponseData = JSON.parse(response.result);
           console.info(`响应数据: ${JSON.stringify(responseData)}`);
-          // 检查 API 状态码
+          // 检查 API 状态码wq
           if (responseData.StatusCode === 0) {
             return true;
           } else {
