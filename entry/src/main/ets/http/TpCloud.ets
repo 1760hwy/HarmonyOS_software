@@ -18,14 +18,14 @@ interface TPLinkApiResponse {
  */
 export class TPLinkCamera {
   // 配置参数
-  private readonly AK: string = "34b45db265eb4ecba48494cda4497369"; // 替换为你的 Access Key
-  private readonly SK: string = "47646a74e43b4f3eb498a92bbdd47e1e"; // 替换为你的 Secret Key
+  private readonly AK: string = "34b45db265eb4ecba44cda4497369"; // 替换为你的 Access Key
+  private readonly SK: string = "47646a74e43b4f3eb492bbdd47e1e"; // 替换为你的 Secret Key
   private readonly TERMINAL_ID: string;
   private readonly API_HOST: string = "api-smbcloud.tp-link.com.cn";
   private readonly API_METHOD: string = "POST";
   private readonly API_PATH_STREAM: string = "/vms/open/httpFlvService/v1/getHttpFlvUrl";
-  private readonly DEVICE_QRCODE: string = "8de5dbd2ca36338a3"; // 你的设备 QRCode
-  private readonly DEVICE_MAC: string = "F4-84-8D-D0-25-7C"; // 替换为你的设备 MAC 地址
+  private readonly DEVICE_QRCODE: string = "8de52ca36338a3"; // 你的设备 QRCode
+  private readonly DEVICE_MAC: string = "F4-84-8D-25-7C"; // 替换为你的设备 MAC 地址
 
   constructor() {
     // 生成唯一的终端ID（建议确认是否需要固定值）
