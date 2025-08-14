@@ -44,9 +44,18 @@ struct Manager {
     this.mapService = new MapService();
     // 申请权限并初始化地图
     let permissions: Array<Permissions> = ['ohos.permission.APPROXIMATELY_LOCATION', 'ohos.permission.LOCATION'];
-    this.mapService.applyPermission(getContext(this), permissions).then((granted) => {
+    this.mapService.applyPermission(getContext(this), permissions)
+      .then(async (granted) => {
+        if (!granted) {
+          console.error('权限未授予，地图将使用默认中心。');
+          this.initMap();
+          return;
+        }
+        // 调用 MapService 中负责获取当前位置并更新 mapOption 的方法（确保 MapService 实现了 initMyLocation）
+        await this.mapService.initMyLocation(getContext(this));
+        // 再初始化地图（此时 mapService.mapOption 已是当前定位）
         this.initMap();
-    });
+      });
   }
 
   private initMap(): void {

@@ -1,5 +1,6 @@
 import abilityAccessCtrl, { Permissions } from '@ohos.abilityAccessCtrl';
 import { mapCommon } from '@kit.MapKit';
+import geoLocationManager from '@ohos.geoLocationManager';
 
 export class MapService {
   private mapOption: mapCommon.MapOptions;
@@ -29,6 +30,31 @@ export class MapService {
       return false;
     }
   }
+
+  // 初始化定位并更新地图中心
+  async initMyLocation(context: Context) {
+    const granted = await this.applyPermission(context, [
+      'ohos.permission.LOCATION',
+      'ohos.permission.APPROXIMATELY_LOCATION'
+    ]);
+
+    if (!granted) {
+      console.error('定位权限未授予');
+      return;
+    }
+
+    // 获取当前位置
+    try {
+      const location = await geoLocationManager.getCurrentLocation();
+      console.info(`当前定位: ${location.latitude}, ${location.longitude}`);
+
+      this.mapOption.position.target.latitude = location.latitude;
+      this.mapOption.position.target.longitude = location.longitude;
+    } catch (err) {
+      console.error('获取定位失败', err);
+    }
+  }
+
 
   // 获取地图选项
   getMapOption(): mapCommon.MapOptions {
