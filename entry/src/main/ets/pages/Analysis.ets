@@ -53,6 +53,7 @@ struct Analysis {
     try {
       const data = await this.rdbHelper.queryAllData();
       this.sensorRecords = data; // 将查询到的数据赋值给状态变量
+      this.initLineChart();
     } catch(e) {
       console.error('Analysis.ts: Failed to load data from DB.', e);
     } finally {
@@ -62,56 +63,88 @@ struct Analysis {
 
   initLineChart() {
     // 1. 构造数据
-    let entries: JArrayList<EntryOhos> = new JArrayList<EntryOhos>();
-    for (let i = 0; i < 12; i++) {
-      // 随机生成 y 值，范围 [10, 60]
-      let yValue = Math.random() * 50 + 10;
-      entries.add(new EntryOhos(i, yValue));
-    }
+    if (this.sensorRecords.length==0) {
+      console.log('Analysis.ts: No data available for chart initialization')
+      return;
+    };
 
-    // 2. 创建并配置 LineDataSet
-    let lineDataSet = new LineDataSet(entries, "传感器数据");
-    // 注意：这里用 setColor(...)，而不是 setLineColor(...)
-    lineDataSet.getColor(0xFF0000FF);         // 不透明蓝色
-    lineDataSet.setLineWidth(2);
-    lineDataSet.setDrawCircles(true);
-    lineDataSet.setCircleColor(0xFF0000FF);   // 数据点圆圈颜色
-    lineDataSet.setCircleRadius(4);
-    lineDataSet.setDrawValues(true);
-    lineDataSet.setValueTextColor(0xFF000000); // 不透明黑色
-    lineDataSet.setValueTextSize(10);
-    lineDataSet.setMode(Mode.CUBIC_BEZIER);    // 平滑曲线
+    // 1. 准备三条线的数据：温度、湿度、光照强度
+    let temperatureEntries: JArrayList<EntryOhos> = new JArrayList<EntryOhos>();
+    let humidityEntries: JArrayList<EntryOhos> = new JArrayList<EntryOhos>();
+    let lightEntries: JArrayList<EntryOhos> = new JArrayList<EntryOhos>();
 
-    // 3. 组装数据集
+    // 取最近的数据（最多20个点，避免图表过于拥挤）
+    const maxDataPoints = Math.min(20, this.sensorRecords.length);
+    const recentData = this.sensorRecords.slice(-maxDataPoints);
+
+    // 2. 遍历数据，构造Entry对象
+    recentData.forEach((record, index) => {
+      temperatureEntries.add(new EntryOhos(index, record.temperature));
+      humidityEntries.add(new EntryOhos(index, record.humidity));
+      // 光照强度可能数值较大，这里可以适当缩放以便在同一图表中显示
+      lightEntries.add(new EntryOhos(index, record.lightIntensity / 100)); // 除以100进行缩放
+    });
+
+    // 3. 创建三个LineDataSet
+    let temperatureDataSet = new LineDataSet(temperatureEntries, "温度 (℃)");
+    temperatureDataSet.getColor(0xFFFF5722);         // 橙红色
+    temperatureDataSet.setLineWidth(2);
+    temperatureDataSet.setDrawCircles(true);
+    temperatureDataSet.setCircleColor(0xFFFF5722);
+    temperatureDataSet.setCircleRadius(3);
+    temperatureDataSet.setDrawValues(false); // 不显示数值，避免拥挤
+    temperatureDataSet.setMode(Mode.CUBIC_BEZIER);
+
+    let humidityDataSet = new LineDataSet(humidityEntries, "湿度 (%)");
+    humidityDataSet.getColor(0xFF2196F3);         // 蓝色
+    humidityDataSet.setLineWidth(2);
+    humidityDataSet.setDrawCircles(true);
+    humidityDataSet.setCircleColor(0xFF2196F3);
+    humidityDataSet.setCircleRadius(3);
+    humidityDataSet.setDrawValues(false);
+    humidityDataSet.setMode(Mode.CUBIC_BEZIER);
+
+    let lightDataSet = new LineDataSet(lightEntries, "光照强度 (/100 lux)");
+    lightDataSet.getColor(0xFFFFEB3B);         // 黄色
+    lightDataSet.setLineWidth(2);
+    lightDataSet.setDrawCircles(true);
+    lightDataSet.setCircleColor(0xFFFFEB3B);
+    lightDataSet.setCircleRadius(3);
+    lightDataSet.setDrawValues(false);
+    lightDataSet.setMode(Mode.CUBIC_BEZIER);
+
+    // 4. 组装数据集
     let dataSets: JArrayList<ILineDataSet> = new JArrayList<ILineDataSet>();
-    dataSets.add(lineDataSet);
+    dataSets.add(temperatureDataSet);
+    dataSets.add(humidityDataSet);
+    dataSets.add(lightDataSet);
 
     let lineData = new LineData(dataSets);
     this.lineChartModel.setData(lineData);
 
-    // 4. 配置 X 轴
+    // 5. 配置 X 轴
     let xAxis = this.lineChartModel.getXAxis();
     if (xAxis) {
       xAxis.setPosition(XAxisPosition.BOTTOM);
       xAxis.setDrawGridLines(false);
-      // 如果想要自定义刻度间隔：xAxis.setGranularity(1);
-      // 也可设置标签格式化：xAxis.setValueFormatter(...)
+      xAxis.setGranularity(1);
+      // 可以设置自定义标签格式化器显示时间
     }
 
-    // 5. 配置左侧 Y 轴
+    // 6. 配置左侧 Y 轴
     let leftAxis = this.lineChartModel.getAxisLeft();
     if (leftAxis) {
       leftAxis.setDrawGridLines(true);
-      leftAxis.setAxisMinimum(0); // Y 轴最小值
+      leftAxis.setAxisMinimum(0);
     }
 
-    // 6. 禁用右侧 Y 轴
+    // 7. 禁用右侧 Y 轴
     let rightAxis = this.lineChartModel.getAxisRight();
     if (rightAxis) {
       rightAxis.setEnabled(false);
     }
 
-    // 7. 配置图例 (Legend)
+    // 8. 配置图例 (Legend)
     let legend = this.lineChartModel.getLegend();
     if (legend) {
       legend.setEnabled(true);
@@ -119,20 +152,22 @@ struct Analysis {
       legend.setTextColor(0xFF000000);
     }
 
-    // 8. 图表描述信息
+    // 9. 图表描述信息
     let description = new Description();
-    description.setText("最近12小时数据变化");
+    description.setText(`最近${maxDataPoints}条记录数据变化`);
     description.setTextColor(0xFF888888);
     this.lineChartModel.setDescription(description);
 
-    // 9. 启用触摸交互与缩放
+    // 10. 启用触摸交互与缩放
     this.lineChartModel.setTouchEnabled(true);
     this.lineChartModel.setDragEnabled(true);
     this.lineChartModel.setScaleEnabled(true);
     this.lineChartModel.setPinchZoom(true);
 
-    // 10. 刷新
+    // 11. 刷新
     this.lineChartModel.invalidate();
+
+    console.log(`Analysis.ts: Chart initialized with ${maxDataPoints} data points`);
   }
 
   build() {
