@@ -25,12 +25,15 @@ import HorizontalViewPortHandler from '@ohos/mpchart/src/main/ets/components/uti
 
 import { AIChatBot } from 'ets/http/Large_model'; // <-- 确保路径正确
 import { router } from '@kit.ArkUI';
+// 【新增】导入数据库相关模块
+import { RdbHelper } from '../Data_Transmit/RdbHelper';
+import { SensorData } from '../Data_Transmit/SensorDataAbility';
+import common from '@ohos.app.ability.common';
 
 interface ChatMessage{
   content:string;//消息内容
   isUser:boolean;//消息是否发送
 }
-
 
 @Entry
 @Component
@@ -47,8 +50,14 @@ struct DataAnalysis{
 
   @State message: string = ""; // 直接用单个字符串状态
 
+  // 【新增】数据库相关状态变量
+  @State sensorRecords: SensorData[] = [];
+  private rdbHelper: RdbHelper | null = null;
+  private context: common.UIAbilityContext | null = null;
+  private dataUpdateTimer: number | null = null; // 定时器ID
 
-
+  // 【新增】AI上下文数据，用于存储要传递给AI的数据摘要
+  private currentDataContext: string = '';
 
   // aboutToAppear 生命周期钩子：组件即将显示时调用，适合在此准备数据和初始化模型
   aboutToAppear() {
@@ -56,6 +65,118 @@ struct DataAnalysis{
     this.initLineChart();
     // console.log("DataAnalysis aboutToAppear: Line chart initialized."); // 调试日志
     this.initBarChart();  // 初始化柱状图
+
+    // 【新增】初始化数据库连接和定时器
+    this.initDatabase();
+    this.startDataUpdateTimer();
+  }
+
+  // 【新增】组件即将销毁时的清理工作
+  aboutToDisappear() {
+    // 清除定时器，防止内存泄漏
+    if (this.dataUpdateTimer !== null) {
+      clearInterval(this.dataUpdateTimer);
+      this.dataUpdateTimer = null;
+    }
+  }
+
+  // 【新增】初始化数据库连接
+  private async initDatabase() {
+    try {
+      this.context = getContext(this) as common.UIAbilityContext;
+      if (this.context) {
+        this.rdbHelper = new RdbHelper(this.context);
+        // 首次加载数据
+        await this.loadAndUpdateAIContext();
+        console.log('DataAnalysis: Database initialized successfully');
+      } else {
+        console.error('DataAnalysis: Failed to get context');
+      }
+    } catch (error) {
+      console.error('DataAnalysis: Failed to initialize database:', error);
+    }
+  }
+
+  // 【新增】启动定时器，每1分钟更新一次数据给AI
+  private startDataUpdateTimer() {
+    // 每60秒（1分钟）执行一次
+    this.dataUpdateTimer = setInterval(async () => {
+      await this.loadAndUpdateAIContext();
+      console.log('DataAnalysis: AI context updated with latest data');
+    }, 60000); // 60000毫秒 = 1分钟
+  }
+
+  // 【新增】从数据库加载数据并更新AI上下文
+  private async loadAndUpdateAIContext() {
+    if (!this.rdbHelper) return;
+
+    try {
+      // 获取最新数据
+      const data = await this.rdbHelper.queryAllData();
+      this.sensorRecords = data;
+
+      // 生成数据摘要传递给AI
+      this.updateAIDataContext();
+    } catch (error) {
+      console.error('DataAnalysis: Failed to load data from database:', error);
+    }
+  }
+
+  // 【新增】更新AI的数据上下文
+  private updateAIDataContext() {
+    if (this.sensorRecords.length === 0) {
+      this.currentDataContext = '当前没有传感器数据';
+      return;
+    }
+
+    // 获取最新的几条记录
+    const recentRecords = this.sensorRecords.slice(-10); // 最近10条记录
+
+    // 计算统计信息
+    const totalRecords = this.sensorRecords.length;
+    const avgTemp = recentRecords.reduce((sum, record) => sum + record.temperature, 0) / recentRecords.length;
+    const avgHumidity = recentRecords.reduce((sum, record) => sum + record.humidity, 0) / recentRecords.length;
+    const avgLight = recentRecords.reduce((sum, record) => sum + record.lightIntensity, 0) / recentRecords.length;
+
+    // 获取最新记录的时间
+    const latestRecord = recentRecords[recentRecords.length - 1];
+    const latestTime = new Date(latestRecord.timestamp).toLocaleString();
+
+    // 构建AI上下文数据字符串
+    this.currentDataContext = `
+当前传感器数据概况：
+- 数据库总记录数：${totalRecords}条
+- 最新更新时间：${latestTime}
+- 近10条记录平均值：
+  * 温度：${avgTemp.toFixed(1)}℃
+  * 湿度：${avgHumidity.toFixed(1)}%
+  * 光照强度：${avgLight.toFixed(0)}lux
+- 最新数据：温度${latestRecord.temperature.toFixed(1)}℃，湿度${latestRecord.humidity.toFixed(1)}%，光照${latestRecord.lightIntensity.toFixed(0)}lux
+`;
+
+    // 【可选】如果需要立即通知AI，可以调用一次静默的API请求
+    // 这里我们选择不主动发送，只是准备好数据等待用户询问时使用
+  }
+
+  // 【修改】增强的AI查询方法，包含数据上下文
+  private async queryAIWithContext(userQuestion: string): Promise<string | null> {
+    // 将用户问题和数据上下文组合
+    const contextualQuery = `
+数据背景信息：
+${this.currentDataContext}
+
+用户问题：${userQuestion}
+
+请基于上述传感器数据背景回答用户的问题。
+`;
+
+    try {
+      const response = await AIChatBot.queryAPI(contextualQuery);
+      return response;
+    } catch (error) {
+      console.error('DataAnalysis: AI query failed:', error);
+      return null;
+    }
   }
 
   // 初始化折线图模型，配置数据和样式 (包含两条线)
@@ -290,8 +411,6 @@ struct DataAnalysis{
     this.barChartModel.invalidate();
   }
 
-
-
   build() {
     Column(){
       Column(){
@@ -423,8 +542,8 @@ struct DataAnalysis{
               // 添加用户消息到聊天记录
               this.chatMessages.push({ content: this.inputText, isUser: true });
 
-              // 调用 AIChatBot API 获取回答
-              AIChatBot.queryAPI(this.inputText).then((answer) => {
+              // 【修改】调用增强的 AI API，包含数据上下文
+              this.queryAIWithContext(this.inputText).then((answer) => {
                 if (answer) {
                   // 添加 AI 回答到聊天记录
                   this.chatMessages.push({ content: answer, isUser: false });
