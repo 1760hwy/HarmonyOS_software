@@ -557,7 +557,7 @@ struct Manager {
       setTimeout(()=>{
         this.showLoading=false;
         AppStorage.setOrCreate("hasLoadedManager",true);
-      },200);
+      },500);
     })
   }
 }

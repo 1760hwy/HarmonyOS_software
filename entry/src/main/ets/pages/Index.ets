@@ -12,7 +12,7 @@ struct LoginPage {
         Column() {
           Stack() {
             // 底层图片
-            Image($r('app.media.dl3'))
+            Image($r('app.media.dl1'))
               .objectFit(ImageFit.Cover)
               .width('100%')
               .height('100%')
@@ -41,7 +41,7 @@ struct LoginPage {
         Column() {
           Stack() {
             // 背景图片
-            Image($r('app.media.dl4'))
+            Image($r('app.media.dl2'))
               .objectFit(ImageFit.Cover)
               .width('100%')
               .height('100%')
