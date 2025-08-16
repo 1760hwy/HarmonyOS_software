@@ -375,7 +375,7 @@ struct Analysis {
       .height(30)
       .border({ width: { top: 1 }, color: '#e0e0e0' }) // 给导航栏顶部加个分割线
       .backgroundColor(Color.White)
-      .position({ left: 0, right: 0, bottom: 0 })
+      .position({ left: 0, right: 0, bottom: 10 })
     }
     .width('100%')
     .backgroundColor("#E8E8E8")

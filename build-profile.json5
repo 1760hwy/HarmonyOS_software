@@ -6,9 +6,9 @@
         "type": "HarmonyOS",
         "material": {
           "storeFile": "D:/HarmonyOS DevEco Studio/development/Project/ntzc.p12",
-          "storePassword": "00000018FEBB4A535272CCEA52F774991945231ABC0F612B1A0AB9F1AE48FB9477F0D2A1FBEADE22",
+          "storePassword": "000000180BFA0AF69C9FA2E1E020803456D53C1D527E832E359B26853DCB047F7AA5F61BCA00A6B8",
           "keyAlias": "ntzc",
-          "keyPassword": "0000001800C512C27CCF5F9C3406A090FA3AE1C9F6869A22787DE590C76E2F00E77C9BE0E878FF17",
+          "keyPassword": "000000188A0456E56F2FEEAD287983ECDAB4B19AE3C6A9A0AEEDFDFAD288182C5DEDAC36BCD507EA",
           "signAlg": "SHA256withECDSA",
           "profile": "D:/HarmonyOS DevEco Studio/development/Project/调试智农云耕Debug.p7b",
           "certpath": "D:/HarmonyOS DevEco Studio/development/Project/调试.cer"

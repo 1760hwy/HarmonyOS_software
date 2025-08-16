@@ -536,7 +536,7 @@ struct Manager {
           .alignItems(HorizontalAlign.Center)
           .justifyContent(FlexAlign.Center)
         }
-        .border({ width: { top: 1 }, color: '#e0e0e0' }) // 给导航栏顶部加个分割线
+        .border({ width: { top: 1 ,bottom:10 }, color: '#e0e0e0' }) // 给导航栏顶部加个分割线
         .width("100%")
         .backgroundColor(Color.White)
         .margin({top:8})

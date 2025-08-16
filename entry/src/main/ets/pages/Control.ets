@@ -395,10 +395,10 @@ struct Manager {
       }
       .width("100%")
       .backgroundColor(Color.White)
-      .border({ width: { top: 1 }, color: '#e0e0e0' }) // 给导航栏顶部加个分割线
+      .border({ width: { top: 1  }, color: '#e0e0e0' }) // 给导航栏顶部加个分割线
       .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM]) // 使用 SafeArea
       .height(30)
-      .position({ left: 0, right: 0, bottom: 0 })
+      .position({ left: 0, right: 0, bottom: 10 })
     }
     .backgroundColor("#F5F5F5") // 稍微调整背景色
     .width("100%")
